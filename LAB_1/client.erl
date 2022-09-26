@@ -8,7 +8,7 @@ start(ServerPid, MyName) ->
     process_commands(ServerPid, MyName, ClientPid).
 
 init_client(ServerPid, MyName) ->
-    ServerPid ! {client_join_req, MyName, ClientPid},  %% Enviem missatge amb les nostres dades.
+    ServerPid ! {client_join_req, MyName, ServerPid},  %% Enviem missatge amb les nostres dades.
     process_requests().
 
 %% Local Functions

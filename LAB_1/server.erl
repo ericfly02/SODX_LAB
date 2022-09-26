@@ -10,7 +10,7 @@ start() ->
 process_requests(Clients) ->
     receive                             % Es suspen el proces esperant per un missatge
         {client_join_req, Name, From} ->
-            NewClients = [Name|Clients],  %% NewClients es la nova llista amb el nou client
+            NewClients = [From|Clients],  %% NewClients es la nova llista amb el nou client
             broadcast(NewClients, {join, Name}),
             process_requests(NewClients);  %% La nova llista es NewClients
         {client_leave_req, Name, From} ->
@@ -19,7 +19,7 @@ process_requests(Clients) ->
             From ! exit,
             process_requests(NewClients);  %% La nova llista es NewClients.
         {send, Name, Text} ->
-            broadcast(Name, Text),  %% Envia el missatge Text al usuari Name.
+            broadcast(Clients, Text),  %% Envia el missatge Text al usuari Name.
             process_requests(Clients);
         disconnect ->
             unregister(myserver)
