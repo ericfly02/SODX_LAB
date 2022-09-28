@@ -19,7 +19,7 @@ process_requests(Clients) ->
             From ! exit,
             process_requests(NewClients);  %% La nova llista es NewClients.
         {send, Name, Text} ->
-            broadcast(Clients, Text),  %% Envia el missatge Text al usuari Name.
+            broadcast(Clients, {Text, Name}),  %% Envia el missatge Text al usuari Name.
             process_requests(Clients);
         disconnect ->
             unregister(myserver)

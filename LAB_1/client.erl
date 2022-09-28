@@ -35,6 +35,7 @@ process_commands(ServerPid, MyName, ClientPid) ->
     if 
         Text  == "exit\n" ->
             ServerPid ! {client_leave_req, MyName, ClientPid},  %% Enviem la solicitud de marxar
+            io:format("[LEFT] left the chat~n"),
             ok;
         true ->
             ServerPid ! {send, MyName, Text},  %% Enviem el text.
