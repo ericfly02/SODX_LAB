@@ -8,7 +8,7 @@ start(ServerPid, MyName) ->
     process_commands(ServerPid, MyName, ClientPid).
 
 init_client(ServerPid, MyName) ->
-    ServerPid ! {client_join_req, MyName, ServerPid},  %% Enviem missatge amb les nostres dades.
+    ServerPid ! {client_join_req, MyName, self()},  %% Enviem missatge amb les nostres dades.
     process_requests().
 
 %% Local Functions
@@ -34,8 +34,7 @@ process_commands(ServerPid, MyName, ClientPid) ->
     Text = io:get_line("-> "),
     if 
         Text  == "exit\n" ->
-            ServerPid ! {client_leave_req, MyName, ClientPid},  %% Enviem la solicitud de marxar
-            io:format("[LEFT] left the chat~n"),
+            ServerPid ! {client_leave_req, MyName, ClientPid},  %% Enviem la solicitud de marxar      
             ok;
         true ->
             ServerPid ! {send, MyName, Text},  %% Enviem el text.
