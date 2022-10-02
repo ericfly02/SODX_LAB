@@ -14,7 +14,7 @@ process_requests(Clients) ->            % IMPORTANT: El que es guarda a la llist
             broadcast(NewClients, {join, Name}),
             process_requests(NewClients);  %% La nova llista es NewClients
         {client_leave_req, Name, From} ->
-            NewClients = lists:delete(From, Clients),  %% Esborrem "Name" de la llista, i ho guardem a NewClients
+            NewClients = lists:delete(From, Clients),  %% Esborrem el pid de la llista, i ho guardem a NewClients
             broadcast(Clients, {leave, Name}),  %% Enviem el missatge de exit a tothom.
             From ! exit,
             process_requests(NewClients);  %% La nova llista es NewClients.
