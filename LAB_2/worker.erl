@@ -4,7 +4,7 @@
 
 start(Name, Lock, Sleep, Work) ->
     spawn(fun() -> init(Name, Lock, Sleep, Work) end).
-
+ 
 init(Name, Lock, Sleep, Work) ->
     Gui = gui:start(Name),
     {A1,A2,A3} = now(),
