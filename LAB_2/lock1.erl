@@ -8,7 +8,7 @@ init(_) ->
     receive
         {peers, Nodes} ->
             open(Nodes);
-        stop ->
+        stop -> 
             ok
     end.
 

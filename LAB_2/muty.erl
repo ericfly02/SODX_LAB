@@ -4,9 +4,9 @@
 % We use the name of the module (i.e. lock3) as a parameter to the start procedure. We also provide the average time (in milliseconds) the worker is going to sleep before trying to get the lock (Sleep) and work with the lock taken (Work).
 
 start(Lock, Sleep, Work) ->
-    register(l1, apply(Lock, start, [1])),
-    register(l2, apply(Lock, start, [2])),
-    register(l3, apply(Lock, start, [3])),
+    register(l1, apply(Lock, start, [1])),  % Registra els processos amb PID =  
+    register(l2, apply(Lock, start, [2])),  % resultat d'aplicar la funció start al modul Lock,
+    register(l3, apply(Lock, start, [3])),  % i donant un número únic a cada lock.
     register(l4, apply(Lock, start, [4])),
     l1 ! {peers, [l2, l3, l4]},
     l2 ! {peers, [l1, l3, l4]},
