@@ -33,8 +33,8 @@ requests(Nodes) ->
       end, 
       Nodes).
 
-wait(Nodes, Master, [], Waiting, TakeRef) ->
-    Master ! {taken, TakeRef},
+wait(Nodes, Master, [], Waiting, TakeRef) -> %Si el 3er parametre (llista de referencies
+    Master ! {taken, TakeRef},                 % esta buit, vol dir que tots els locks han respos ok a la solicitud del lock 
     held(Nodes, Waiting);
 wait(Nodes, Master, Refs, Waiting, TakeRef) ->
     receive

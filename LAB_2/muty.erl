@@ -1,21 +1,27 @@
 -module(muty).
--export([start/3, stop/0]).
+-behaviour(supervisor).
+-export([start/7, stop/0]).
 
 % We use the name of the module (i.e. lock3) as a parameter to the start procedure. We also provide the average time (in milliseconds) the worker is going to sleep before trying to get the lock (Sleep) and work with the lock taken (Work).
 
-start(Lock, Sleep, Work) ->
-    register(l1, apply(Lock, start, [1])),  % Registra els processos amb PID =  
-    register(l2, apply(Lock, start, [2])),  % resultat d'aplicar la funció start al modul Lock,
-    register(l3, apply(Lock, start, [3])),  % i donant un número únic a cada lock.
-    register(l4, apply(Lock, start, [4])),
-    l1 ! {peers, [l2, l3, l4]},
-    l2 ! {peers, [l1, l3, l4]},
-    l3 ! {peers, [l1, l2, l4]},
-    l4 ! {peers, [l1, l2, l3]},
-    register(w1, worker:start("John", l1, Sleep, Work)),
-    register(w2, worker:start("Ringo", l2, Sleep, Work)),    
-    register(w3, worker:start("Paul", l3, Sleep, Work)),
-    register(w4, worker:start("George", l4, Sleep, Work)),
+start(Lock, Sleep, Work, Node1, Node2, Node3, Node4) ->
+    
+    
+    global:register_name(l1, spawn(Node1, Lock, start, [1]), fun global:notify_all_name/3),
+    global:register_name(l2, spawn(Node2, Lock, start, [2]), fun global:notify_all_name/3),
+    global:register_name(l3, spawn(Node3, Lock, start, [3]), fun global:notify_all_name/3),
+    global:register_name(l4, spawn(Node4, Lock, start, [4]), fun global:notify_all_name/3),
+
+    global_group:send(l1, {peers, [l2, l3, l4]}),
+    global_group:send(l2, {peers, [l1, l3, l4]}),
+    global_group:send(l3, {peers, [l1, l2, l4]}),
+    global_group:send(l4, {peers, [l1, l2, l3]}),
+
+    global:register_name(w1, spawn(Node1, worker, start, ["Eroc", l1, Sleep, Work])),
+    global:register_name(w2, spawn(Node2, worker, start, ["x", l2, Sleep, Work])),
+    global:register_name(w3, spawn(Node3, worker, start, ["Ixent", l3, Sleep, Work])),
+    global:register_name(w4, spawn(Node4, worker, start, ["Roma", l4, Sleep, Work])),
+    
     ok.
 
 stop() ->
