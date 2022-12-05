@@ -9,36 +9,37 @@ init(Id, Master, Jitter) ->
     random:seed(A1, A2, A3),
     receive
         {peers, Nodes} ->
-            server(Master, seq:new(Id), seq:new(Id), Nodes, [], [], Jitter)
+            server(Master, seq:new(Id), seq:new(Id), Nodes, [], [], Jitter, 0)
     end.
 
-server(Master, MaxPrp, MaxAgr, Nodes, Cast, Queue, Jitter) ->
+server(Master, MaxPrp, MaxAgr, Nodes, Cast, Queue, Jitter, MCount) ->
 receive
     {send, Msg} ->
         Ref = make_ref(),
         request(Ref, Msg, Nodes, Jitter),
         NewCast = cast(Ref, Nodes, Cast),
-        server(Master, MaxPrp, MaxAgr, Nodes, NewCast, Queue, Jitter);
+        server(Master, MaxPrp, MaxAgr, Nodes, NewCast, Queue, Jitter, MCount+1);
     {request, From, Ref, Msg} ->
         NewMaxPrp = seq:increment(seq:max(MaxPrp, MaxAgr)),
         From ! {proposal, Ref, NewMaxPrp},
         NewQueue = insert(Ref, Msg, NewMaxPrp, Queue),
-        server(Master, NewMaxPrp, MaxAgr, Nodes, Cast, NewQueue, Jitter);
+        server(Master, NewMaxPrp, MaxAgr, Nodes, Cast, NewQueue, Jitter, MCount+1);
     {proposal, Ref, Proposal} ->
         case proposal(Ref, Proposal, Cast) of
             {agreed, MaxSeq, NewCast} ->
                 agree(Ref, MaxSeq, Nodes),
-                server(Master, MaxPrp, MaxSeq, Nodes, NewCast, Queue, Jitter);
+                server(Master, MaxPrp, MaxSeq, Nodes, NewCast, Queue, Jitter, MCount+1);
             NewCast ->
-                server(Master, MaxPrp, MaxAgr, Nodes, NewCast, Queue, Jitter)
+                server(Master, MaxPrp, MaxAgr, Nodes, NewCast, Queue, Jitter, MCount+1)
         end;
     {agreed, Ref, Seq} ->
         Updated = update(Ref, Seq, Queue),
         {Agreed, NewQueue} = agreed(Updated),
         deliver(Master, Agreed),
         NewMaxAgr = max(MaxAgr, Seq),
-        server(Master, MaxPrp, NewMaxAgr, Nodes, Cast, NewQueue, Jitter);
+        server(Master, MaxPrp, NewMaxAgr, Nodes, Cast, NewQueue, Jitter, MCount+1);
     stop ->
+        io:format("Number of messages sent: ~p~n", [MCount]),
         ok
 end.
 
